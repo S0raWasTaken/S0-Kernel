@@ -1,17 +1,24 @@
 #![no_std]
 #![no_main]
 #![allow(clippy::empty_loop)]
+#![feature(custom_test_frameworks)]
+#![test_runner(s0ra_os::test_runner)]
+#![reexport_test_harness_main = "test_main"]
 
 use core::{arch::asm, fmt::Write, panic::PanicInfo, str::Chars};
 
 use vga_buffer::{Color, WRITER};
 
+mod serial;
 mod vga_buffer;
 
 const COMPUTER: &str = include_str!("../text/computer.txt");
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
+    #[cfg(test)]
+    test_main();
+
     colored_print(COMPUTER.chars());
 
     // Update cursor position
@@ -19,7 +26,7 @@ pub extern "C" fn _start() -> ! {
         asm!(
             "
             mov dl, 80
-            mov bx, 21
+            mov bx, 24
             mov ax, 9
             mul dl
             add bx, ax
@@ -81,8 +88,15 @@ fn colored_print(mut txt: Chars) {
     }
 }
 
+#[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     printcln!(LightRed, "{}", info);
     loop {}
+}
+
+#[cfg(test)]
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    s0ra_os::test_panic_handler(info)
 }

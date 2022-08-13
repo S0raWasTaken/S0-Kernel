@@ -49,22 +49,22 @@ impl ColorCode {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
-struct ScreenChar {
-    ascii_character: u8,
+pub struct ScreenChar {
+    pub ascii_character: u8,
     color_code: ColorCode,
 }
 
-const BUFFER_HEIGHT: usize = 25;
-const BUFFER_WIDTH: usize = 80;
+pub const BUFFER_HEIGHT: usize = 25;
+pub const BUFFER_WIDTH: usize = 80;
 
 #[repr(transparent)]
-struct Buffer {
-    chars: [[Volatile<ScreenChar>; BUFFER_WIDTH]; BUFFER_HEIGHT],
+pub struct Buffer {
+    pub chars: [[Volatile<ScreenChar>; BUFFER_WIDTH]; BUFFER_HEIGHT],
 }
 
 pub struct Writer {
     pub color_code: RefCell<ColorCode>,
-    buffer: &'static mut Buffer,
+    pub buffer: &'static mut Buffer,
     column_position: usize,
 }
 
@@ -159,7 +159,7 @@ macro_rules! printc {
 #[macro_export]
 macro_rules! printcln {
     ($color:tt, $($arg:tt)*) => {
-        $crate::printc!(White, "{}\n", format_args!($($arg)*));
+        $crate::printc!($color, "{}\n", format_args!($($arg)*));
     };
 }
 
